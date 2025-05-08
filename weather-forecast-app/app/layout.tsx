@@ -23,9 +23,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" love-deals="879BC0364EB9EBEE3DBE71B15E175613">
+    <html style={{height:"100%"}} lang="en" love-deals="879BC0364EB9EBEE3DBE71B15E175613">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
         data-new-gr-c-s-check-loaded="14.1234.0"
         data-gr-ext-installed=""
       >
