@@ -25,16 +25,35 @@ export default function useGeoWeather() {
               temp_max: data.main.temp_max,
               humidity: data.main.humidity,
               pressure: data.main.pressure,
+              sea_level: 0,
+              grnd_level: 0
             },
             weather: data.weather,
             wind: {
               speed: data.wind.speed,
+              deg: 0,
+              gust: 0
             },
             sys: {
               sunrise: data.sys.sunrise,
               sunset: data.sys.sunset,
               country: data.sys.country,
+              type: 0,
+              id: 0
             },
+            coord: {
+              lon: 0,
+              lat: 0
+            },
+            base: '',
+            visibility: 0,
+            clouds: {
+              all: 0
+            },
+            dt: 0,
+            timezone: 0,
+            id: 0,
+            cod: 0
           };
 
           setWeather(mappedData);

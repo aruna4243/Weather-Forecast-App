@@ -45,3 +45,35 @@ export interface WeatherData {
   name: string;
   cod: number;
 }
+
+
+export interface ForecastEntry {
+  dt: number;
+  dt_txt: string;
+  main: {
+    temp: number;
+    feels_like: number;
+    temp_min: number;
+    temp_max: number;
+    pressure: number;
+    sea_level?: number;
+    grnd_level?: number;
+    humidity: number;
+  };
+  weather: {
+    id: number;
+    main: string;
+    description: string;
+    icon: string;
+  }[];
+  clouds: { all: number };
+  wind: {
+    speed: number;
+    deg: number;
+    gust?: number;
+  };
+  visibility: number;
+  pop: number;
+  rain?: { '3h': number };
+  sys: { pod: string };
+}

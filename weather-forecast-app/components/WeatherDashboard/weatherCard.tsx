@@ -1,15 +1,19 @@
 "use client";
-import {  useState } from "react";
+import { useEffect, useState } from "react";
 import { WeatherData } from "@/types/weather";
+import { Tooltip } from 'react-tooltip';
+import { useTheme } from 'next-themes';
+
 import {
   FaMapMarkerAlt,
-  FaWind,
-  FaTint,
-  FaThermometerHalf,
   FaSun,
   FaMoon,
   FaSearch,
+  FaHeart,
+  FaRegHeart,
 } from "react-icons/fa";
+import { useFavorites } from "@/hooks/useFavorites";
+
 
 function formatTime(timestamp: number) {
   return new Date(timestamp * 1000).toLocaleTimeString([], {
@@ -22,162 +26,169 @@ function formatTime(timestamp: number) {
 interface WeatherCardProps {
   data: WeatherData;
   onSearch: (query: string) => void;
-
 }
 
 export default function WeatherCard({ data, onSearch }: WeatherCardProps) {
+  const { theme} = useTheme();
   const [input, setInput] = useState("");
-  const [suggestions, setSuggestions] = useState<{ city: string; region: string; country: string }[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [unit, setUnit] = useState<"metric" | "imperial">("metric");
+  const { favorites, addFavorite, removeFavorite } = useFavorites();
+  const isFavorite = favorites.includes(data.name);
+const [localDate, setLocalDate] = useState("");
 
-  // useEffect(() => {
-  //   const fetchSuggestions = async () => {
-  //     if (!input.trim()) return setSuggestions([]);
-
-  //     try {
-  //       const response = await fetch(
-  //         `https://wft-geo-db.p.rapidapi.com/v1/geo/cities?namePrefix=${input}&limit=5&sort=-population`,
-  //         {
-  //           headers: {
-  //             "X-RapidAPI-Key": process.env.NEXT_PUBLIC_GEODB_API_KEY || "",
-  //             "X-RapidAPI-Host": "wft-geo-db.p.rapidapi.com",
-  //           },
-  //         }
-  //       );
-  //       const data = await response.json();
-
-  //       // Check if 'data.data' exists and is an array
-  //       if (data && Array.isArray(data.data)) {
-  //         setSuggestions(
-  //           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  //           data.data.map((item: any) => ({
-  //             city: item.name,
-  //             region: item.region,
-  //             country: item.country,
-  //           }))
-  //         );
-  //       } else {
-  //         setSuggestions([]); // Fallback to empty suggestions
-  //       }
-  //     } catch (error) {
-  //       console.error("Error fetching suggestions:", error);
-  //       setSuggestions([]); // Fallback in case of API error
-  //     }
-  //   };
-
-  //   const debounce = setTimeout(fetchSuggestions, 300);
-  //   return () => clearTimeout(debounce);
-  // }, [input]);
+useEffect(() => {
+  const formatted = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
+  setLocalDate(formatted);
+}, []);
+  const toggleUnit = () => {
+    setUnit(unit === "metric" ? "imperial" : "metric");
+  };
 
   const handleSearch = (query: string) => {
     onSearch(query);
     setInput("");
-    setSuggestions([]);
-    setShowSuggestions(false);
   };
 
+  const temperature =
+    unit === "metric"
+      ? Math.round(data.main.temp)
+      : Math.round(data.main.temp * 1.8 + 32);
+
+  const high =
+    unit === "metric"
+      ? Math.round(data.main.temp_max)
+      : Math.round(data.main.temp_max * 1.8 + 32);
+  const low =
+    unit === "metric"
+      ? Math.round(data.main.temp_min)
+      : Math.round(data.main.temp_min * 1.8 + 32);
+
   return (
-    <div className=" h-fit   p-6 w-full flex flex-col gap-4 relative">
-      {/* Header */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
-          <FaMapMarkerAlt className="text-blue-500" />
-          <div>
-            <h2 className="text-xl font-bold">{data.name}</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {data.state ? `${data.state}, ` : ""}{data.sys.country}
-            </p>
-          </div>
-        </div>
+   <div className={`${theme === 'dark' ? 'bg-[#212121] text-[#f5f5f5] border-none' : 'bg-white  text-black  border-gray-300'} rounded-2xl p-4  w-full mx-auto flex flex-col gap-4 `}>
+  {/* Date & Unit Toggle */}
+  <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+    <h2 className="text-lg sm:text-xl font-semibold">
+      {localDate}
+    </h2>
 
-        <div className="relative w-60">
-          <div className="flex border rounded-md overflow-hidden dark:border-gray-600">
-            <input
-              type="text"
-              placeholder="Search city..."
-              className="px-3 py-1 text-sm w-full dark:bg-[#424242] border-none focus:outline-none"
-              value={input}
-              onChange={(e) => {
-                setInput(e.target.value);
-                setShowSuggestions(true);
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && input.trim()) handleSearch(input.trim());
-              }}
-            />
-            <button
-              onClick={() => input.trim() && handleSearch(input.trim())}
-              className="px-3 text-gray-500 hover:text-gray-700 dark:hover:text-white"
-            >
-              <FaSearch />
-            </button>
-          </div>
+    <div className="flex items-center space-x-2 self-start sm:self-auto">
+      <button
+        className={`px-3 py-1 text-sm font-medium rounded-full transition ${
+          unit === "metric"
+            ? "bg-blue-600 text-white"
+            : "bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100"
+        }`}
+        onClick={toggleUnit}
+      >
+        °C
+      </button>
+      <button
+        className={`px-3 py-1 text-sm font-medium rounded-full transition ${
+          unit === "imperial"
+            ? "bg-blue-600 text-white"
+            : "bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-100"
+        }`}
+        onClick={toggleUnit}
+      >
+        °F
+      </button>
+    </div>
+  </div>
 
-          {showSuggestions && suggestions.length > 0 && (
-            <ul className="absolute z-10 bg-white dark:bg-[#424242] w-full border rounded-md mt-1 max-h-48 overflow-auto text-sm shadow">
-              {suggestions.map((s, i) => (
-                <li
-                  key={i}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-                  onClick={() => handleSearch(`${s.city}, ${s.region}, ${s.country}`)}
-                >
-                  {s.city}, {s.region}, {s.country}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-
-      {/* Weather Info */}
-      <div className="flex items-center gap-4">
-        <img
-          src={`https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`}
-          alt={data.weather[0].description}
-          className="w-16 h-16"
-        />
-        <div>
-          <h3 className="text-4xl font-semibold">{Math.round(data.main.temp)}°C</h3>
-          <p className="capitalize text-gray-600 dark:text-gray-300">
-            {data.weather[0].description}
-          </p>
-        </div>
-      </div>
-
-      {/* Details */}
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div className="flex items-center gap-2">
-          <FaThermometerHalf className="text-orange-500" />
-          <span>Feels Like: {Math.round(data.main.feels_like)}°C</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <FaWind className="text-cyan-500" />
-          <span>Wind: {data.wind.speed} m/s</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <FaTint className="text-blue-400" />
-          <span>Humidity: {data.main.humidity}%</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <FaSun className="text-yellow-500" />
-          <span>Sunrise: {formatTime(data.sys.sunrise)}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <FaThermometerHalf className="text-red-400" />
-          <span>High: {Math.round(data.main.temp_max)}°C</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <FaThermometerHalf className="text-blue-400" />
-          <span>Low: {Math.round(data.main.temp_min)}°C</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <FaMoon className="text-purple-500" />
-          <span>Sunset: {formatTime(data.sys.sunset)}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <span>Pressure: {data.main.pressure} hPa</span>
+  {/* Location and Search */}
+  <div className="flex flex-col sm:flex-row justify-between gap-3">
+    <div className="flex items-center gap-2">
+      <FaMapMarkerAlt className="text-blue-500 text-xl" />
+      <div className="flex items-center gap-1">
+        <h3 className="text-lg font-semibold">{data.name}</h3>
+        <div className="px-1">
+          <span
+            data-tooltip-id="fav-tooltip"
+            data-tooltip-content={isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+            className="cursor-pointer text-xl"
+            onClick={() =>
+              isFavorite ? removeFavorite(data.name) : addFavorite(data.name)
+            }
+          >
+            {isFavorite ? (
+              <FaHeart className="text-red-500" />
+            ) : (
+              <FaRegHeart className={` ${theme === 'dark' ? 'text-gray-300  hover:text-red-300'  : 'text-gray-500 hover:text-red-400'}`} />
+            )}
+          </span>
+          <Tooltip id="fav-tooltip" place="bottom" />
         </div>
       </div>
     </div>
+
+    <div className={`relative flex items-center border rounded-md overflow-hidden  ${theme === 'dark' ? ' bg-gray-800'  : ' bg-gray-100'}`}>
+      <input
+        type="text"
+        placeholder="Search city..."
+        className="px-3 py-1 text-sm w-full sm:w-40 dark:bg-transparent focus:outline-none"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && input.trim()) handleSearch(input.trim());
+        }}
+      />
+      <button
+        onClick={() => input.trim() && handleSearch(input.trim())}
+        className="px-3 text-gray-500 hover:text-gray-700 dark:hover:text-white"
+      >
+        <FaSearch />
+      </button>
+    </div>
+  </div>
+
+  {/* Temperature and Icon */}
+  <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div>
+      <h1 className="text-6xl sm:text-7xl font-bold">
+        {temperature}°{unit === "metric" ? "C" : "F"}
+      </h1>
+      <p className={`capitalize ${theme === 'dark' ? 'text-gray-100'  : ' text-gray-600'} text-base sm:text-lg`}>
+        {data.weather[0].description}
+      </p>
+      <p className={`text-sm mt-1 font-bold ${theme === 'dark' ? 'text-gray-400'  : ' text-gray-700'} `}>
+        H: {high}° L: {low}°
+      </p>
+    </div>
+    <img
+      src={`https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png`}
+      alt={data.weather[0].description}
+      className="w-28 h-28 sm:w-36 sm:h-36"
+    />
+  </div>
+
+  {/* Sunrise & Sunset */}
+  <div className="grid grid-cols-2 gap-4 text-sm">
+    <div className={`flex items-center gap-2 ${theme === 'dark' ? 'bg-[#333333]'  : 'bg-gray-100'} px-3 py-2 rounded-md shadow-sm`}>
+      <FaSun className="text-yellow-400 text-base" />
+      <span>Sunrise: {formatTime(data.sys.sunrise)}</span>
+    </div>
+    <div className={`flex items-center gap-2 ${theme === 'dark' ? 'bg-[#333333]'  : 'bg-gray-100'} px-3 py-2 rounded-md shadow-sm`}>
+      <FaMoon className="text-indigo-400 text-base" />
+      <span>Sunset: {formatTime(data.sys.sunset)}</span>
+    </div>
+  </div>
+  {/* Weather Tip */}
+<div className={`mt-4 p-3 rounded-md  ${theme === 'dark' ? 'bg-[#333333]' : 'bg-blue-50'} text-sm`}>
+  <p className="font-medium">Tip:</p>
+  <p>
+    {data.weather[0].main === "Rain" && "Don’t forget your umbrella today!"}
+    {data.weather[0].main === "Clear" && "Great day for outdoor activities, but don’t forget sunscreen!"}
+    {data.weather[0].main === "Snow" && "Wear warm clothes and drive safely!"}
+    {data.weather[0].main === "Clouds" && "Mild day ahead. Good for a walk!"}
+    {!["Rain", "Clear", "Snow", "Clouds"].includes(data.weather[0].main) && "Check hourly forecast for detailed planning."}
+  </p>
+</div>
+
+</div>
+
   );
 }
