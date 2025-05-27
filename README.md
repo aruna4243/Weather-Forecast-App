@@ -4,23 +4,24 @@ A modern, responsive weather forecast application built with **Next.js**, **Type
 Users can also **save and quickly access** up to **3 favorite locations** directly on the dashboard for **easy weather monitoring**.
 
 **Features**
-Search weather by city name or current location
 
-View current temperature, humidity, wind speed, and weather conditions
+1. Search weather by city name or current location
 
-Hourly forecast for the next 24 hours
+2. View current temperature, humidity, wind speed, and weather conditions
 
-7-day weather forecast with detailed daily summaries
+3. Hourly forecast for the next 24 hours
 
-Save and switch between up to 3 favorite locations on the dashboard
+4. 7-day weather forecast with detailed daily summaries
 
-Clean and responsive UI optimized for desktop and mobile
+5. Save and switch between up to 3 favorite locations on the dashboard
 
-Built with Next.js for fast performance and SEO benefits
+6. Clean and responsive UI optimized for desktop and mobile
 
-Styled with Tailwind CSS for a sleek, customizable design
+7. Built with Next.js for fast performance and SEO benefits
 
-TypeScript for type safety and maintainability
+8. Styled with Tailwind CSS for a sleek, customizable design
+
+9. TypeScript for type safety and maintainability
 
 **Tech Stack**
 **Next.js** – React framework with server-side rendering and static site generation
