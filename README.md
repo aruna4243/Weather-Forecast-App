@@ -24,6 +24,8 @@ Users can also **save and quickly access** up to **3 favorite locations** direct
 9. TypeScript for type safety and maintainability
 
 **Tech Stack**
+
+
 **Next.js** – React framework with server-side rendering and static site generation
 
 **TypeScript** – Adds type safety to JavaScript
